@@ -10,10 +10,10 @@ export class RegistrationPage {
         this.registerButton = page.locator('#register');
         this.backToLoginButton = page.locator('#gotologin');
         this.uniqueUserName = `jein${Date.now()}`;
-        this.FirstNameLabel = page.locator('#firstname-label');
-        this.LastNameLabel = page.locator('#lastname-label');
-        this.UserNameLabel = page.locator('#userName-label');
-        this.PasswordLabel = page.locator('#password-label');
+        this.firstNameLabel = page.locator('#firstname-label');
+        this.lastNameLabel = page.locator('#lastname-label');
+        this.userNameLabel = page.locator('#userName-label');
+        this.passwordLabel = page.locator('#password-label');
     };
 
     async navigateToRegistrationForm() {
@@ -35,8 +35,11 @@ export class RegistrationPage {
 
     async returnToLogin() {
         await this.backToLoginButton.click();
-    }
+    };
 
-    
+    async pressTab() {
+    await this.page.keyboard.press('Tab');
+    };
+
 
 }
