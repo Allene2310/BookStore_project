@@ -15,13 +15,11 @@ test('TC-REG-002: Registration with valid data', async ({request}) => {
             }
         });
 
+        expect(response.status()).toBe(201);
         
         const body = await response.json();
         expect(body.username).toBe(userName);
         expect(body.userID).toBeDefined();
-
-        expect(response.status()).toBe(201);
-        
 
 }); 
 
@@ -38,9 +36,10 @@ test('TC-REG-009: Registration with existing username', async ({request}) => {
             }
         });
 
+        expect(firstResponse.status()).toBe(201);
+
         const body = await firstResponse.json();
         const user = body.username;
-        expect(firstResponse.status()).toBe(201);
 
 
         const secondResponse = await request.post('https://demoqa.com/Account/v1/User', {
@@ -53,11 +52,11 @@ test('TC-REG-009: Registration with existing username', async ({request}) => {
             }
         });
 
-        const bodyResp= await secondResponse.json();
+        expect(secondResponse.status()).toBe(406);
 
+        const bodyResp = await secondResponse.json();
         expect(bodyResp.message).toContain('User exists');
 
-        expect(secondResponse.status()).toBe(406);
 }); 
 
 
@@ -72,17 +71,19 @@ test('TC-REG-004: Registration with empty required fields', async ({request}) =>
             }
         });
 
+        expect(response.status()).toBe(400);
+
         const body = await response.json();
         expect(body.message).toContain('UserName and Password required.');
 
-        expect(response.status()).toBe(400);
 });
 
 
 test('TC-REG-005: Registration with password at minimum required length', async ({request}) => {
+        const userName = `gein${Date.now()}`;
         const response = await request.post('https://demoqa.com/Account/v1/User', {
             data: {
-                "userName": `gein${Date.now()}`,
+                "userName": userName,
                 "password": "Gein*124"
             },
             headers:{
@@ -90,11 +91,12 @@ test('TC-REG-005: Registration with password at minimum required length', async 
             }
         });
 
+        expect(response.status()).toBe(201);
+
         const body = await response.json();
-        expect(body.username).toBeDefined();
+        expect(body.username).toBe(userName);
         expect(body.userID).toBeDefined();
         
-        expect(response.status()).toBe(201);
 });
 
 
@@ -108,11 +110,13 @@ test('TC-REG-006: Registration with password shorter than minimum required lengt
                 'Content-Type': 'application/json'
             }
         });
-        const body = await response.json();
-
-        expect(body.message).toContain("Passwords must have");
 
         expect(response.status()).toBe(400);
+
+        const body = await response.json();
+        expect(body.message).toContain("Passwords must have");
+
+        
 });
 
 
@@ -126,10 +130,12 @@ test('TC-REG-007: Registration with password does not meet required characters',
                 'Content-Type': 'application/json'
             }
         });
+
+        expect(response.status()).toBe(400);
+
         const body = await response.json();
         expect(body.message).toContain("Passwords must have");
 
-        expect(response.status()).toBe(400);
 });
 
 
@@ -143,11 +149,11 @@ test('TC-REG-007: Registration with password does not meet required characters',
                 'Content-Type': 'application/json'
             }
         });
-        const body = await response.json();
-        expect(body.message).not.toContain("User exists");
-    
+
         expect(response.status()).toBe(400);
 
+        const body = await response.json();
+        expect(body.message).toContain('UserName and Password required.');
         
 });
 
