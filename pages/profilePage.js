@@ -24,6 +24,7 @@ export class ProfilePage {
         this.bookPublishers = this.bookRows.locator('td:nth-child(4)');
         this.ascarrow = page.getByLabel('sorted-asc');
         this.descarrow = page.getByLabel('sorted-desc');
+        this.deleteAccountButton = page.getByRole('button', {name: 'Delete Account'});
     }
 
     async addBooksToCollection(bookTitles) {
@@ -86,6 +87,24 @@ export class ProfilePage {
         await this.confirmCancelButton.waitFor({ state: 'hidden' });
     }
 
+    async deleteUserAccount() {
+    
+        const deleteResponse = this.page.waitForResponse(response =>
+            response.url().includes('/Account/v1/User') && response.request().method() === 'DELETE'
+        );
+     
+        await this.deleteAccountButton.click();
+        await this.confirmOkButton.click();
+        await deleteResponse;
+    };
+
+    async cancelDeleteUserAccount() {
+        await this.deleteAccountButton.click();
+        await this.confirmCancelButton.click();
+        await this.confirmCancelButton.waitFor({state: 'hidden'});
+    }
+}
+
     
 
-}
+
