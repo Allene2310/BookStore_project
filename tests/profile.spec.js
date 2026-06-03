@@ -3,6 +3,8 @@ import { LoginPage } from '../pages/loginPage';
 import { ProfilePage } from '../pages/profilePage';
 
 
+let profilePage;
+let loginPage;
 
 async function goToProfile(page) {
     if (!page.url().includes('/profile')) {
@@ -10,23 +12,45 @@ async function goToProfile(page) {
     }
 }
 
-async function cleanUp(profilePage) {
-    await goToProfile(profilePage.page);  
+async function deleteAllBooksAPI(request, userName, password) {
+    const loginResponse = await request.post('https://demoqa.com/Account/v1/Login', {
+        data: {
+            userName,
+            password
+        }
+    });
+    expect(loginResponse.status()).toBe(200);
 
-       if (await profilePage.bookRows.count() > 0) {
-        await profilePage.deleteAllBooksFromCollection();
-        await profilePage.page.reload();
+    const loginBody = await loginResponse.json();
+    const deleteResponse = await request.delete(`https://demoqa.com/BookStore/v1/Books?UserId=${loginBody.userId}`, {
+        headers: {
+            Authorization: `Bearer ${loginBody.token}`
+        }
+    });
+
+    expect(deleteResponse.status()).toBe(204);
+}
+
+async function cleanUp(profilePage, loginPage, request) {
+    await goToProfile(profilePage.page);
+
+    if (await profilePage.bookRows.count() > 0) {
+        await deleteAllBooksAPI(request, loginPage.registeredUserName, loginPage.registeredPassword);
     }
 }
 
+
+
+
 test.describe('Profile Tests', () => {
     test.describe.configure({ mode: 'default' }); 
-    let profilePage;
     let profile;
+    
+    
 
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page, request }) => {
         profilePage = new ProfilePage(page);
-        const loginPage = new LoginPage(page);
+        loginPage = new LoginPage(page);
         await loginPage.navigateToLoginPage();
         await loginPage.fillLoginForm(loginPage.registeredUserName, loginPage.registeredPassword);
 
@@ -36,12 +60,12 @@ test.describe('Profile Tests', () => {
 
         await loginPage.submitLogin();
         profile = await (await profileResponse).json();
-        await cleanUp(profilePage);
+        await cleanUp(profilePage, loginPage, request);
     });
 
-    test.afterEach(async ({ page }) => {
-        //clean up - delete all books from collection after each test
-        await cleanUp (profilePage);
+    test.afterEach(async ({ request }) => {
+        
+        await cleanUp (profilePage, loginPage, request);
         await profilePage.logoutButton.click();
 
     });
@@ -145,7 +169,7 @@ test.describe('Profile Tests', () => {
         await profilePage.logoutButton.click();
 
         await expect(page).toHaveURL(/login/);
-        const loginPage = new LoginPage(page);
+        loginPage = new LoginPage(page);
         await loginPage.fillLoginForm(loginPage.registeredUserName, loginPage.registeredPassword);
         await loginPage.submitLogin();
 
@@ -189,12 +213,11 @@ test.describe('Navigation without login', () => {
 test.describe('Search functionality on Profile page', () => {
     test.describe.configure({ mode: 'default' }); 
 
-    let profilePage;
 
     test.beforeEach(async ({ page}) => {
 
         profilePage = new ProfilePage(page);
-        const loginPage = new LoginPage(page);
+        loginPage = new LoginPage(page);
         await loginPage.navigateToLoginPage();
         await loginPage.fillLoginForm(loginPage.registeredUserName, loginPage.registeredPassword);
         await loginPage.submitLogin();
@@ -202,8 +225,8 @@ test.describe('Search functionality on Profile page', () => {
 
     });
 
-    test.afterEach(async () => {
-        await cleanUp(profilePage);
+    test.afterEach(async ({request}) => {
+        await cleanUp(profilePage, loginPage, request);
         await profilePage.logoutButton.click();
     });
 
@@ -267,19 +290,19 @@ test.describe('Search functionality on Profile page', () => {
 test.describe('Sort functionality on Profile page', () => {
     test.describe.configure({ mode: 'default' });
 
-    let profilePage;
+
 
     test.beforeEach(async ({ page }) => {
         profilePage = new ProfilePage(page);
-        const loginPage = new LoginPage(page);
+        loginPage = new LoginPage(page);
         await loginPage.navigateToLoginPage();
         await loginPage.fillLoginForm(loginPage.registeredUserName, loginPage.registeredPassword);
         await loginPage.submitLogin();
         
     });
 
-    test.afterEach(async () => {
-        await cleanUp (profilePage);
+    test.afterEach(async ({ request }) => {
+        await cleanUp (profilePage, loginPage, request);
         await profilePage.logoutButton.click();
     });
 
@@ -292,9 +315,9 @@ test.describe('Sort functionality on Profile page', () => {
         const initialTitles = await profilePage.bookTitles.allTextContents();
 
         await profilePage.sortTitleButton.click();
-        const arctitles = await profilePage.bookTitles.allTextContents();
-        const ascSortedTitles = [...arctitles].sort((a, b) => a.localeCompare(b));
-        expect(arctitles).toEqual(ascSortedTitles);
+        const asctitles = await profilePage.bookTitles.allTextContents();
+        const ascSortedTitles = [...asctitles].sort((a, b) => a.localeCompare(b));
+        expect(asctitles).toEqual(ascSortedTitles);
         await expect(profilePage.ascarrow).toBeVisible();
 
 
