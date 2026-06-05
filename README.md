@@ -32,7 +32,7 @@ DemoQA Book Store Application: https://demoqa.com/books
 - Functional testing
 - UI testing
 - Responsive testing
-- Accessibility testing
+- Basic Accessibility testing
 - API testing
 - Exploratory testing
 
@@ -50,18 +50,23 @@ DemoQA Book Store Application: https://demoqa.com/books
 
 ```text
 BookStore_project/
-├── pages/                 # Page Object Model classes
-├── tests/                 # Playwright automation tests
-├── docs/                  # Testing documentation
+├── .github/workflows/        # GitHub Actions workflow
+├── components/               # Reusable components used in automation tests
+├── pages/                    # Page Object Model classes
+├── tests/                    # Playwright UI and API automated tests
+├── docs/                     # QA documentation
 │   ├── requirements/
 │   ├── test-scenarios/
 │   ├── test-cases/
 │   ├── bug-reports/
 │   └── test-reports/
-├── evidence/              # Screenshots, videos or links to evidence
-├── .github/workflows/     # GitHub Actions workflow
+├── evidence/                 # Screenshots, reports, and test evidence
+│   ├── screenshots/
+│   └── html-reports/
 ├── package.json
-└── playwright.config.js
+├── package-lock.json
+├── playwright.config.js
+└── README.md
 ```
 
 ## Key Findings
@@ -84,11 +89,16 @@ Automation tests are implemented using Playwright.
 
 Current automation coverage includes:
 
-- Login functionality
-- Registration UI checks
 - Registration API checks
+- Registration UI checks
+- Login functionality
+- Profile page functionality
+- Book Store page functionality
+- Book Details page functionality
+- Book Store Application Menu functionality
+- Delete Account API checks
+- Delete Account UI checks
 
-Some registration UI tests are limited because reCAPTCHA can block stable automated execution. For this reason, registration validation is better covered through API automation and manual UI testing.
 
 
 
